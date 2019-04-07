@@ -1,0 +1,3 @@
+# Xit
+
+Some Git functionality.
