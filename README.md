@@ -1,3 +1,3 @@
 # Xit
 
-Some Git functionality.
+Small subset of Git functionality.
