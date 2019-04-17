@@ -4,7 +4,7 @@ defmodule XitIndexTest do
 
   setup do
     Support.Fs.setup()
-    on_exit(fn -> Support.Fs.cleanup() end)
+    on_exit(&Support.Fs.cleanup/0)
     assert(File.ls!() === [])
     :ok
   end

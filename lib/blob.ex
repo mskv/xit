@@ -1,0 +1,8 @@
+defmodule Xit.Blob do
+  @enforce_keys [:content]
+  defstruct [:content]
+
+  @type t :: %__MODULE__{
+          content: String.t()
+        }
+end
