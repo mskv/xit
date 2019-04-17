@@ -17,5 +17,6 @@ defmodule Xit.Init do
   @spec populate_base_directory() :: :ok | {:error, any}
   defp populate_base_directory() do
     File.mkdir_p(Xit.Constants.objects_dir_path())
+    File.touch(Xit.Constants.index_path())
   end
 end

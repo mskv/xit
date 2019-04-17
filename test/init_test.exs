@@ -14,7 +14,7 @@ defmodule XitInitTest do
     assert_repository_initialized()
   end
 
-  test "when there is already a repository threre, reinitializes it" do
+  test "when there is already a repository there, reinitializes it" do
     File.mkdir!(".xit")
     {:ok, :reinitialized} = Xit.Init.call()
     assert_repository_initialized()
@@ -22,6 +22,7 @@ defmodule XitInitTest do
 
   defp assert_repository_initialized do
     assert(File.ls!() === [".xit"])
-    assert(File.ls!(".xit") === ["objects"])
+    assert(["objects", "index"] -- File.ls!(".xit") === [])
+    assert(File.ls!(".xit") -- ["objects", "index"] === [])
   end
 end
