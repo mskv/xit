@@ -11,6 +11,10 @@ defmodule Xit.Cli do
     Xit repository reinitialized.
   """
 
+  @added_copy ~S"""
+    Changes indexed.
+  """
+
   @not_recognized_copy ~S"""
     Not recognized, try 'xit help' to see your options.
   """
@@ -24,6 +28,12 @@ defmodule Xit.Cli do
         case Xit.Init.call() do
           {:ok, :initialized} -> IO.puts(@initialized_copy)
           {:ok, :reinitialized} -> IO.puts(@reinitialized_copy)
+          {:error, reason} -> IO.puts(error_copy(reason))
+        end
+
+      ["add", path] ->
+        case Xit.Add.call(path) do
+          :ok -> IO.puts(@added_copy)
           {:error, reason} -> IO.puts(error_copy(reason))
         end
 
