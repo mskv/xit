@@ -1,4 +1,4 @@
-defmodule Xit.Add do
+defmodule Xit.AddCmd do
   @spec call(String.t()) :: :ok | {:error, any}
   def call(path) do
     with {:ok, valid_path} <- validate_path(path),

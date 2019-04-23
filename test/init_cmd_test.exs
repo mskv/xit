@@ -1,6 +1,6 @@
-defmodule XitInitTest do
+defmodule XitInitCmdTest do
   use ExUnit.Case
-  doctest Xit.Init
+  doctest Xit.InitCmd
 
   setup do
     Support.Fs.setup()
@@ -10,13 +10,13 @@ defmodule XitInitTest do
   end
 
   test "when running in an empty directory, initializes it" do
-    {:ok, :initialized} = Xit.Init.call()
+    {:ok, :initialized} = Xit.InitCmd.call()
     assert_repository_initialized()
   end
 
   test "when there is already a repository there, reinitializes it" do
     File.mkdir!(".xit")
-    {:ok, :reinitialized} = Xit.Init.call()
+    {:ok, :reinitialized} = Xit.InitCmd.call()
     assert_repository_initialized()
   end
 

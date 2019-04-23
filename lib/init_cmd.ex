@@ -1,4 +1,4 @@
-defmodule Xit.Init do
+defmodule Xit.InitCmd do
   @spec call() :: {:ok, :initialized} | {:ok, :reinitialized} | {:error, any}
   def call do
     ok_status = if db_base_dir_exists(), do: :reinitialized, else: :initialized

@@ -17,7 +17,7 @@ defmodule XitIndexTest do
     path = "."
     desired_entries = [%Xit.Index.Entry{path: "path", id: "1"}]
 
-    {:ok, :initialized} = Xit.Init.call()
+    {:ok, :initialized} = Xit.InitCmd.call()
     create_empty_index_file()
     :ok = Xit.Index.update(path, desired_entries)
 
@@ -32,7 +32,7 @@ defmodule XitIndexTest do
     path = "test"
     desired_entries = [%Xit.Index.Entry{path: "test/1.ex", id: "2"}]
 
-    {:ok, :initialized} = Xit.Init.call()
+    {:ok, :initialized} = Xit.InitCmd.call()
     create_filled_index_file(existant_entries)
     :ok = Xit.Index.update(path, desired_entries)
 
@@ -54,7 +54,7 @@ defmodule XitIndexTest do
     path = "test"
     desired_entry = %Xit.Index.Entry{path: "test/1.ex", id: "3"}
 
-    {:ok, :initialized} = Xit.Init.call()
+    {:ok, :initialized} = Xit.InitCmd.call()
     create_filled_index_file(existant_entries)
     :ok = Xit.Index.update(path, [desired_entry])
 
@@ -83,7 +83,7 @@ defmodule XitIndexTest do
     path = "test"
     desired_entry = %Xit.Index.Entry{path: "test/2.ex", id: "4"}
 
-    {:ok, :initialized} = Xit.Init.call()
+    {:ok, :initialized} = Xit.InitCmd.call()
     create_filled_index_file(existant_entries)
     :ok = Xit.Index.update(path, [desired_entry])
 

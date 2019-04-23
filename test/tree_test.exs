@@ -13,7 +13,7 @@ defmodule XitTreeTest do
     test ~S"""
       reports that it had been called with an empty index
     """ do
-      {:ok, :initialized} = Xit.Init.call()
+      {:ok, :initialized} = Xit.InitCmd.call()
 
       index = %Xit.Index{entries: []}
 
@@ -24,7 +24,7 @@ defmodule XitTreeTest do
     test ~S"""
       Represents the index contents as tree objects identified by their SHAs
     """ do
-      {:ok, :initialized} = Xit.Init.call()
+      {:ok, :initialized} = Xit.InitCmd.call()
 
       first_root_entry = %Xit.Index.Entry{path: "first_entry.ex", id: "1"}
       second_root_entry = %Xit.Index.Entry{path: "second_entry.ex", id: "2"}

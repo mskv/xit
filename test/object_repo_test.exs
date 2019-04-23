@@ -24,7 +24,7 @@ defmodule XitObjectRepoTest do
         File.write!(path, content)
       end)
 
-      {:ok, :initialized} = Xit.Init.call()
+      {:ok, :initialized} = Xit.InitCmd.call()
       {:ok, shas} = Xit.ObjectRepo.persist_blobs_by_paths(Enum.map(files, & &1[:path]))
 
       persisted_paths = Enum.map(shas, &".xit/objects/#{&1}")
