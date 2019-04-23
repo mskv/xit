@@ -43,15 +43,23 @@ defmodule Xit.AddCmd do
   @spec existant_files_descended_from_path(String.t()) :: [String.t()]
   defp existant_files_descended_from_path(path) do
     if File.exists?(path) && !File.dir?(path) do
-      [path]
+      if path_prefixed_with_base_dir(path), do: [], else: [path]
     else
       :filelib.fold_files(
         String.to_charlist(path),
         '.*',
         true,
-        fn file, acc -> [file | acc] end,
+        fn file, acc ->
+          file_string = to_string(file)
+          if path_prefixed_with_base_dir(file_string), do: acc, else: [file_string | acc]
+        end,
         []
       )
     end
+  end
+
+  @spec path_prefixed_with_base_dir(String.t()) :: boolean
+  defp path_prefixed_with_base_dir(path) do
+    String.starts_with?(path, Path.expand(Xit.Constants.base_dir_path()))
   end
 end
