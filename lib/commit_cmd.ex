@@ -2,7 +2,7 @@ defmodule Xit.CommitCmd do
   @spec call() :: :ok | {:error, any}
   def call do
     with {:ok, index} <- Xit.Index.read(),
-         {:ok, tree_sha} <- Xit.Tree.write_from_index(index),
+         {:ok, tree_sha} <- Xit.WriteTreeFromIndex.call(index),
          {:ok, head} <- Xit.Head.get(),
          parent_ids <- if(String.length(head) > 0, do: [head], else: []),
          {:ok, commit_sha} <- Xit.Commit.new(tree_sha, parent_ids) |> Xit.Commit.persist(),
