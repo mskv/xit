@@ -13,7 +13,7 @@ defmodule Xit.Index do
   defstruct [:entries]
 
   @type t :: %__MODULE__{
-          entries: [Entry.t()]
+          entries: list(Entry.t())
         }
 
   @spec new() :: t()
@@ -33,7 +33,7 @@ defmodule Xit.Index do
   end
 
   @spec read() :: {:ok, __MODULE__.t()} | {:error, any}
-  defp read() do
+  def read() do
     with {:ok, serialized} <- File.read(Xit.Constants.index_path()) do
       # :erlang.binary_to_term assumes correct input, otherwise throws
       deserialized =
@@ -53,7 +53,7 @@ defmodule Xit.Index do
   end
 
   @spec write(__MODULE__.t()) :: :ok | {:error, any}
-  defp write(index) do
+  def write(index) do
     serialized = :erlang.term_to_binary(index)
 
     with :ok <- File.write(Xit.Constants.index_path(), serialized) do

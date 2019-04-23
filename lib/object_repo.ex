@@ -1,4 +1,6 @@
 defmodule Xit.ObjectRepo do
+  @type object :: Xit.Blob.t() | Xit.Tree.t()
+
   @spec persist_blobs_by_paths([String.t()]) :: {:ok, [String.t()]} | {:error, any}
   def persist_blobs_by_paths(paths) do
     # TODO: batch to keep memory usage in check
@@ -25,7 +27,7 @@ defmodule Xit.ObjectRepo do
     end
   end
 
-  @spec persist_object(Xit.Blob.t()) :: {:ok, String.t()} | {:error, any}
+  @spec persist_object(object) :: {:ok, String.t()} | {:error, any}
   def persist_object(object) do
     serialized = :erlang.term_to_binary(object)
     sha = :crypto.hash(:sha, serialized) |> Base.encode16()
