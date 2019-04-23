@@ -22,7 +22,6 @@ defmodule XitInitCmdTest do
 
   defp assert_repository_initialized do
     assert(File.ls!() === [".xit"])
-    assert(["objects", "index"] -- File.ls!(".xit") === [])
-    assert(File.ls!(".xit") -- ["objects", "index"] === [])
+    assert(Support.Util.lists_eq_irrespective_of_order(["objects", "index", "HEAD"], File.ls!(".xit")))
   end
 end

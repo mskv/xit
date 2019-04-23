@@ -1,5 +1,5 @@
 defmodule Xit.ObjectRepo do
-  @type object :: Xit.Blob.t() | Xit.Tree.t()
+  @type object :: Xit.Blob.t() | Xit.Tree.t() | Xit.Commit.t()
 
   @spec persist_blobs_by_paths([String.t()]) :: {:ok, [String.t()]} | {:error, any}
   def persist_blobs_by_paths(paths) do

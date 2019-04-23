@@ -18,5 +18,6 @@ defmodule Xit.InitCmd do
   defp populate_base_directory() do
     File.mkdir_p(Xit.Constants.objects_dir_path())
     File.touch(Xit.Constants.index_path())
+    File.touch(Xit.Constants.head_path())
   end
 end

@@ -15,6 +15,10 @@ defmodule Xit.Cli do
     Changes indexed.
   """
 
+  @committed_copy ~S"""
+    Staging area committed.
+  """
+
   @not_recognized_copy ~S"""
     Not recognized, try 'xit help' to see your options.
   """
@@ -34,6 +38,12 @@ defmodule Xit.Cli do
       ["add", path] ->
         case Xit.AddCmd.call(path) do
           :ok -> IO.puts(@added_copy)
+          {:error, reason} -> IO.puts(error_copy(reason))
+        end
+
+      ["commit"] ->
+        case Xit.CommitCmd.call() do
+          :ok -> IO.puts(@committed_copy)
           {:error, reason} -> IO.puts(error_copy(reason))
         end
 
