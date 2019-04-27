@@ -15,25 +15,18 @@ defmodule Xit.WriteTreeFromIndex do
   end
 
   @spec write_path_from_index_meta(Xit.IndexMeta.t(), String.t()) :: {:ok, String.t()} | {:error, any}
-  defp write_path_from_index_meta(index_meta = {path_to_file_id_map, dir_to_content_paths_map}, path) do
-    content_paths = Map.get(dir_to_content_paths_map, path)
+  defp write_path_from_index_meta(index_meta = {file_meta, dir_meta}, path) do
+    content_paths = Map.get(dir_meta, path)
 
-    {file_paths, dir_paths} = partition_dir_content_paths(path_to_file_id_map, content_paths)
+    {file_paths, dir_paths} = partition_dir_content_paths(file_meta, content_paths)
 
-    file_shas = file_paths |> Enum.map(fn path -> Map.get(path_to_file_id_map, path) end)
+    file_shas = file_paths |> Enum.map(fn path -> Map.get(file_meta, path) end)
 
     persist_dirs =
       dir_paths
       |> Enum.map(fn path -> Task.async(fn -> write_path_from_index_meta(index_meta, path) end) end)
       |> Enum.map(&Task.await/1)
-      |> List.foldr({:ok, []}, fn result, acc ->
-        with {:ok, shas} <- acc,
-             {:ok, sha} <- result do
-          {:ok, [sha | shas]}
-        else
-          error -> error
-        end
-      end)
+      |> Xit.MiscUtil.traverse()
 
     with {:ok, dir_shas} <- persist_dirs do
       tree_edges =
@@ -46,19 +39,19 @@ defmodule Xit.WriteTreeFromIndex do
         end)
 
       tree = %Xit.Tree{edges: tree_edges}
-      Xit.ObjectRepo.persist_object(tree)
+      Xit.ObjectRepo.write(tree)
     else
       error -> error
     end
   end
 
   @spec partition_dir_content_paths(
-          Xit.IndexMeta.path_to_file_id_map(),
+          Xit.IndexMeta.file_meta(),
           MapSet.t(String.t())
         ) :: {[String.t()], [String.t()]}
-  defp partition_dir_content_paths(path_to_file_id_map, content_paths) do
+  defp partition_dir_content_paths(file_meta, content_paths) do
     Enum.reduce(content_paths, {[], []}, fn path, {file_paths, dir_paths} ->
-      if Map.has_key?(path_to_file_id_map, path),
+      if Map.has_key?(file_meta, path),
         do: {[path | file_paths], dir_paths},
         else: {file_paths, [path | dir_paths]}
     end)

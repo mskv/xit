@@ -1,65 +1,50 @@
 defmodule Xit.AddCmd do
   @spec call(String.t()) :: :ok | {:error, any}
   def call(path) do
-    with {:ok, valid_path} <- validate_path(path),
-         files <- existant_files_descended_from_path(valid_path),
-         {:ok, shas} <- Xit.ObjectRepo.persist_blobs_by_paths(files),
-         desired_index_entries <-
-           Enum.zip(files, shas)
-           |> Enum.map(fn {file, sha} -> %Xit.Index.Entry{path: file, id: sha} end),
-         :ok <- Xit.Index.update(valid_path, desired_index_entries) do
-      :ok
-    else
-      error -> error
-    end
-  end
-
-  @spec validate_path(String.t()) :: {:ok, String.t()} | {:error, any}
-  defp validate_path(path) do
-    with {:ok, path} <- path_within_cwd(path) do
-      path_points_at_dir_or_file(path)
-    else
-      error -> error
-    end
-  end
-
-  @spec path_within_cwd(String.t()) :: {:ok, String.t()} | {:error, any}
-  defp path_within_cwd(path) do
     with {:ok, cwd} <- File.cwd(),
-         expanded_path <- Path.expand(path) do
-      if String.starts_with?(expanded_path, cwd),
-        do: {:ok, expanded_path},
-        else: {:error, :path_outside_cwd}
+         :ok <- Xit.MiscUtil.ok_or(File.exists?(path), :no_match),
+         {:ok, file_paths} <- build_file_paths_to_add(path, cwd),
+         {:ok, valid_path} <- Xit.PathUtil.validate_normalize_path(path, cwd),
+         {:ok, shas} <- Xit.ObjectRepo.write_blobs_by_paths(file_paths),
+         {:ok, index} <- Xit.Index.read() do
+      desired_index_entries =
+        [file_paths, shas]
+        |> Enum.zip()
+        |> Enum.map(fn {file_path, sha} -> %Xit.Index.Entry{path: file_path, id: sha} end)
+
+      updated_index = Xit.Index.update_deep(index, valid_path, desired_index_entries)
+
+      Xit.Index.write(updated_index)
     else
       error -> error
     end
   end
 
-  @spec path_points_at_dir_or_file(String.t()) :: {:ok, String.t()} | {:error, any}
-  defp path_points_at_dir_or_file(path) do
-    if File.exists?(path), do: {:ok, path}, else: {:error, :no_match}
+  @spec build_file_paths_to_add(String.t(), String.t()) :: {:ok, [String.t()]} | {:error, any}
+  defp build_file_paths_to_add(path, cwd) do
+    with descended <- file_paths_descended_from_path(path),
+         {:ok, normalized} <-
+           descended
+           |> Enum.map(&Xit.PathUtil.validate_normalize_path(&1, cwd))
+           |> Xit.MiscUtil.traverse() do
+      {:ok, Enum.reject(normalized, &Xit.PathUtil.path_prefixed_with_base_dir?/1)}
+    else
+      error -> error
+    end
   end
 
-  @spec existant_files_descended_from_path(String.t()) :: [String.t()]
-  defp existant_files_descended_from_path(path) do
+  @spec file_paths_descended_from_path(String.t()) :: [String.t()]
+  defp file_paths_descended_from_path(path) do
     if File.exists?(path) && !File.dir?(path) do
-      if path_prefixed_with_base_dir(path), do: [], else: [path]
+      [path]
     else
       :filelib.fold_files(
         String.to_charlist(path),
         '.*',
         true,
-        fn file, acc ->
-          file_string = to_string(file)
-          if path_prefixed_with_base_dir(file_string), do: acc, else: [file_string | acc]
-        end,
+        fn file, acc -> [to_string(file) | acc] end,
         []
       )
     end
-  end
-
-  @spec path_prefixed_with_base_dir(String.t()) :: boolean
-  defp path_prefixed_with_base_dir(path) do
-    String.starts_with?(path, Path.expand(Xit.Constants.base_dir_path()))
   end
 end

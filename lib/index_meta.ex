@@ -1,41 +1,44 @@
 defmodule Xit.IndexMeta do
+  # map of file paths to file ids
   # example: %{"some/file" => "<sha>"}
-  @type path_to_file_id_map :: %{required(String.t()) => String.t()}
+  @type file_meta :: %{required(String.t()) => String.t()}
 
+  # map of dir paths to sets containing the file and dir paths in given dirs
   # example: %{"" => MapSet<["some"]>, "some" => MapSet<["some/file"]>}
   # note that the content paths are not relative to the containing directory
-  @type dir_to_content_paths_map :: %{required(String.t()) => MapSet.t(String.t())}
+  @type dir_meta :: %{required(String.t()) => MapSet.t(String.t())}
 
-  @type t :: {path_to_file_id_map, dir_to_content_paths_map}
+  # index meta consists of both file and dir meta
+  @type t :: {file_meta, dir_meta}
 
   @spec build(Xit.Index.t()) :: t
   def build(index) do
-    index.entries
-    |> Enum.reduce(
+    Enum.reduce(
+      index.entries,
       {%{}, %{}},
-      fn entry, {path_to_file_id_map, dir_to_content_paths_map} ->
+      fn entry, {file_meta, dir_meta} ->
         {
-          Map.put(path_to_file_id_map, entry.path, entry.id),
-          update_dir_to_content_paths_map(dir_to_content_paths_map, entry.path)
+          Map.put(file_meta, entry.path, entry.id),
+          update_dir_meta(dir_meta, entry.path)
         }
       end
     )
   end
 
-  @spec update_dir_to_content_paths_map(dir_to_content_paths_map, String.t()) :: dir_to_content_paths_map
-  defp update_dir_to_content_paths_map(dir_to_content_paths_map, path) do
+  @spec update_dir_meta(dir_meta, String.t()) :: dir_meta
+  defp update_dir_meta(dir_meta, path) do
     path_split = String.split(path, "/")
 
-    {new_dir_to_content_paths_map, _} =
+    {new_dir_meta, _} =
       Enum.reduce(
         path_split,
-        {dir_to_content_paths_map, ""},
-        fn path_part, {dir_to_content_paths_map, path_so_far} ->
+        {dir_meta, ""},
+        fn path_part, {dir_meta, path_so_far} ->
           absolute_part_path = Path.join(path_so_far, path_part)
 
           {
             Map.update(
-              dir_to_content_paths_map,
+              dir_meta,
               path_so_far,
               MapSet.new([absolute_part_path]),
               &MapSet.put(&1, absolute_part_path)
@@ -45,6 +48,6 @@ defmodule Xit.IndexMeta do
         end
       )
 
-    new_dir_to_content_paths_map
+    new_dir_meta
   end
 end

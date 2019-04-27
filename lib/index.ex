@@ -21,17 +21,6 @@ defmodule Xit.Index do
     %__MODULE__{entries: []}
   end
 
-  @spec update(String.t(), [Entry.t()]) :: :ok | {:error, any}
-  def update(path, desired_entries) do
-    with {:ok, index} <- read(),
-         {:ok, updated_index} <- do_update(index, path, desired_entries),
-         :ok <- write(updated_index) do
-      :ok
-    else
-      error -> error
-    end
-  end
-
   @spec read() :: {:ok, __MODULE__.t()} | {:error, any}
   def read() do
     with {:ok, serialized} <- File.read(Xit.Constants.index_path()) do
@@ -52,6 +41,14 @@ defmodule Xit.Index do
     end
   end
 
+  @spec read!() :: __MODULE__.t()
+  def read!() do
+    case read() do
+      {:ok, index} -> index
+      _ -> raise "index reading failed"
+    end
+  end
+
   @spec write(__MODULE__.t()) :: :ok | {:error, any}
   def write(index) do
     serialized = :erlang.term_to_binary(index)
@@ -63,31 +60,41 @@ defmodule Xit.Index do
     end
   end
 
-  @spec(
-    do_update(__MODULE__.t(), String.t(), [Entry.t()]) :: {:ok, __MODULE__.t()},
-    {:error, any}
-  )
-  defp do_update(index, path, desired_entries) do
-    with {:ok, cwd} <- File.cwd() do
-      path_relative = Path.relative_to(path, cwd)
-
-      desired_entries_relative =
-        Enum.map(desired_entries, fn entry ->
-          %Entry{entry | path: Path.relative_to(entry.path, cwd)}
-        end)
-
-      existant_entries_outside_path =
-        Enum.filter(index.entries, fn entry ->
-          not String.starts_with?(Path.relative_to(entry.path, cwd), path_relative)
-        end)
-
-      {:ok,
-       %Xit.Index{
-         index
-         | entries: Enum.concat(desired_entries_relative, existant_entries_outside_path)
-       }}
-    else
-      error -> error
+  @spec write!(__MODULE__.t()) :: :ok
+  def write!(index) do
+    case write(index) do
+      :ok -> :ok
+      _ -> raise "index writing failed"
     end
+  end
+
+  @spec update_deep(__MODULE__.t(), String.t(), [Entry.t()]) :: __MODULE__.t()
+  def update_deep(index, dir_path, desired_entries) do
+    do_update(index, desired_entries, fn entry ->
+      not Xit.PathUtil.path_nested_in?(entry.path, dir_path)
+    end)
+  end
+
+  @spec update_shallow(__MODULE__.t(), String.t(), [Entry.t()]) :: __MODULE__.t()
+  def update_shallow(index, dir_path, desired_entries) do
+    do_update(index, desired_entries, fn entry ->
+      not (Xit.PathUtil.dirname(entry.path) === dir_path)
+    end)
+  end
+
+  @spec do_update(
+          __MODULE__.t(),
+          [Entry.t()],
+          (String.t() -> boolean)
+        ) :: __MODULE__.t()
+  defp do_update(
+         index,
+         desired_new_entries,
+         entry_desirable
+       ) do
+    desired_existant_entries = Enum.filter(index.entries, entry_desirable)
+
+    new_entries = Enum.concat(desired_new_entries, desired_existant_entries)
+    %Xit.Index{index | entries: new_entries}
   end
 end

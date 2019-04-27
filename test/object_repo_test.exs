@@ -9,7 +9,7 @@ defmodule XitObjectRepoTest do
     :ok
   end
 
-  describe "#persist_blobs_by_paths" do
+  describe "#write_blobs_by_paths" do
     test ~S"""
       Persists each blob in its own file identified by the SHA
       of the file's content.
@@ -25,7 +25,7 @@ defmodule XitObjectRepoTest do
       end)
 
       {:ok, :initialized} = Xit.InitCmd.call()
-      {:ok, shas} = Xit.ObjectRepo.persist_blobs_by_paths(Enum.map(files, & &1[:path]))
+      {:ok, shas} = Xit.ObjectRepo.write_blobs_by_paths(Enum.map(files, & &1[:path]))
 
       persisted_paths = Enum.map(shas, &".xit/objects/#{&1}")
 

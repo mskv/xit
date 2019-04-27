@@ -9,106 +9,87 @@ defmodule XitIndexTest do
     :ok
   end
 
-  test "when the index file does not exist, failes" do
-    {:error, :enoent} = Xit.Index.update(".", [])
-  end
+  describe "#update_deep" do
+    test "when index is empty, fills it with desired entries" do
+      index = %Xit.Index{entries: []}
+      path = "."
+      desired_entries = [%Xit.Index.Entry{path: "path", id: "1"}]
 
-  test "when an empty index file exists, fills it with serialized content" do
-    path = "."
-    desired_entries = [%Xit.Index.Entry{path: "path", id: "1"}]
+      updated_index = Xit.Index.update_deep(index, path, desired_entries)
 
-    {:ok, :initialized} = Xit.InitCmd.call()
-    create_empty_index_file()
-    :ok = Xit.Index.update(path, desired_entries)
+      assert(index_file_contains(updated_index, desired_entries))
+    end
 
-    assert(index_file_contains(desired_entries))
-  end
+    test """
+      when index has entries under different path,
+      the new entries get appended to the index
+    """ do
+      existant_entries = [%Xit.Index.Entry{path: "lib/1.ex", id: "1"}]
+      index = %Xit.Index{entries: existant_entries}
+      path = "test"
+      desired_entries = [%Xit.Index.Entry{path: "test/1.ex", id: "2"}]
 
-  test """
-    when an index file has entries under different path,
-    the new entries get appended to the index
-  """ do
-    existant_entries = [%Xit.Index.Entry{path: "lib/1.ex", id: "1"}]
-    path = "test"
-    desired_entries = [%Xit.Index.Entry{path: "test/1.ex", id: "2"}]
+      updated_index = Xit.Index.update_deep(index, path, desired_entries)
 
-    {:ok, :initialized} = Xit.InitCmd.call()
-    create_filled_index_file(existant_entries)
-    :ok = Xit.Index.update(path, desired_entries)
+      assert(index_file_contains(updated_index, existant_entries ++ desired_entries))
+    end
 
-    assert(index_file_contains(existant_entries ++ desired_entries))
-  end
+    test """
+      when index file has entries under same path,
+      the new entries replace the old ones
+    """ do
+      existant_non_conflicting_entry = %Xit.Index.Entry{path: "lib/1.ex", id: "1"}
+      existant_conflicting_entry = %Xit.Index.Entry{path: "test/1.ex", id: "2"}
 
-  test """
-    when an index file has entries under same path,
-    the new entries get replace the old ones
-  """ do
-    existant_non_conflicting_entry = %Xit.Index.Entry{path: "lib/1.ex", id: "1"}
-    existant_conflicting_entry = %Xit.Index.Entry{path: "test/1.ex", id: "2"}
-
-    existant_entries = [
-      existant_non_conflicting_entry,
-      existant_conflicting_entry
-    ]
-
-    path = "test"
-    desired_entry = %Xit.Index.Entry{path: "test/1.ex", id: "3"}
-
-    {:ok, :initialized} = Xit.InitCmd.call()
-    create_filled_index_file(existant_entries)
-    :ok = Xit.Index.update(path, [desired_entry])
-
-    assert(
-      index_file_contains([
+      existant_entries = [
         existant_non_conflicting_entry,
-        desired_entry
-      ])
-    )
-  end
+        existant_conflicting_entry
+      ]
 
-  test """
-    when an index file has entries that no longer exist among the new
-    desired list, they get deleted
-  """ do
-    existant_non_conflicting_entry = %Xit.Index.Entry{path: "lib/1.ex", id: "1"}
-    existant_entry_to_be_deleted = %Xit.Index.Entry{path: "test/1.ex", id: "2"}
-    existant_conflicting_entry = %Xit.Index.Entry{path: "test/2.ex", id: "3"}
+      index = %Xit.Index{entries: existant_entries}
+      path = "test"
+      desired_entry = %Xit.Index.Entry{path: "test/1.ex", id: "3"}
 
-    existant_entries = [
-      existant_non_conflicting_entry,
-      existant_entry_to_be_deleted,
-      existant_conflicting_entry
-    ]
+      updated_index = Xit.Index.update_deep(index, path, [desired_entry])
 
-    path = "test"
-    desired_entry = %Xit.Index.Entry{path: "test/2.ex", id: "4"}
+      assert(
+        index_file_contains(updated_index, [
+          existant_non_conflicting_entry,
+          desired_entry
+        ])
+      )
+    end
 
-    {:ok, :initialized} = Xit.InitCmd.call()
-    create_filled_index_file(existant_entries)
-    :ok = Xit.Index.update(path, [desired_entry])
+    test """
+      when index has entries that no longer exist among the new
+      desired list, they get deleted
+    """ do
+      existant_non_conflicting_entry = %Xit.Index.Entry{path: "lib/1.ex", id: "1"}
+      existant_entry_to_be_deleted = %Xit.Index.Entry{path: "test/1.ex", id: "2"}
+      existant_conflicting_entry = %Xit.Index.Entry{path: "test/2.ex", id: "3"}
 
-    assert(
-      index_file_contains([
+      existant_entries = [
         existant_non_conflicting_entry,
-        desired_entry
-      ])
-    )
+        existant_entry_to_be_deleted,
+        existant_conflicting_entry
+      ]
+
+      index = %Xit.Index{entries: existant_entries}
+      path = "test"
+      desired_entry = %Xit.Index.Entry{path: "test/2.ex", id: "4"}
+
+      updated_index = Xit.Index.update_deep(index, path, [desired_entry])
+
+      assert(
+        index_file_contains(updated_index, [
+          existant_non_conflicting_entry,
+          desired_entry
+        ])
+      )
+    end
   end
 
-  defp create_empty_index_file do
-    File.touch!(Xit.Constants.index_path())
-  end
-
-  defp create_filled_index_file(entries) do
-    %Xit.Index{entries: entries}
-    |> :erlang.term_to_binary()
-    |> (&File.write!(Xit.Constants.index_path(), &1)).()
-  end
-
-  defp index_file_contains(entries) do
-    File.read!(Xit.Constants.index_path())
-    |> :erlang.binary_to_term()
-    |> (& &1.entries).()
-    |> Support.Util.lists_eq_irrespective_of_order(entries)
+  defp index_file_contains(index, entries) do
+    Support.Util.lists_eq_irrespective_of_order(index.entries, entries)
   end
 end

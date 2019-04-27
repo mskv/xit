@@ -27,6 +27,6 @@ defmodule Xit.Commit do
 
   @spec persist(__MODULE__.t()) :: {:ok, String.t()} | {:error, any}
   def persist(commit) do
-    Xit.ObjectRepo.persist_object(commit)
+    Xit.ObjectRepo.write(commit)
   end
 end
