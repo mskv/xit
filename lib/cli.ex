@@ -47,6 +47,12 @@ defmodule Xit.Cli do
           {:error, reason} -> IO.puts(error_copy(reason))
         end
 
+      ["log"] ->
+        case Xit.LogCmd.call() do
+          {:ok, log} -> IO.puts(log_copy(log))
+          {:error, reason} -> IO.puts(error_copy(reason))
+        end
+
       _ ->
         IO.puts(@not_recognized_copy)
     end
@@ -57,5 +63,13 @@ defmodule Xit.Cli do
       An error has occurred...
       #{reason}
     """
+  end
+
+  defp log_copy(log) do
+    if log === [] do
+      "No history"
+    else
+      Enum.join(log, "\n")
+    end
   end
 end
