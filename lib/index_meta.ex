@@ -25,6 +25,31 @@ defmodule Xit.IndexMeta do
     )
   end
 
+  @spec compare_indices(Xit.IndexMeta.t(), Xit.IndexMeta.t()) ::
+          {[String.t()], [String.t()], [String.t()]}
+  def compare_indices(current_index_meta, desired_index_meta) do
+    {current_file_meta, current_dir_meta} = current_index_meta
+    {desired_file_meta, desired_dir_meta} = desired_index_meta
+
+    files_to_delete = Map.keys(current_file_meta) -- Map.keys(desired_file_meta)
+    dirs_to_delete = (Map.keys(current_dir_meta) -- Map.keys(desired_dir_meta)) -- [""]
+
+    files_to_upsert =
+      Enum.reduce(
+        desired_file_meta,
+        [],
+        fn {path, sha}, acc ->
+          if Map.has_key?(current_file_meta, path) and Map.get(current_file_meta, path) === sha do
+            acc
+          else
+            [path | acc]
+          end
+        end
+      )
+
+    {files_to_delete, dirs_to_delete, files_to_upsert}
+  end
+
   @spec update_dir_meta(dir_meta, String.t()) :: dir_meta
   defp update_dir_meta(dir_meta, path) do
     path_split = String.split(path, "/")

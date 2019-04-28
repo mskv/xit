@@ -1,5 +1,6 @@
 defmodule Xit.MiscUtil do
   @type result(ok, error) :: {:ok, ok} | {:error, error}
+  @type simple_result(error) :: :ok | {:error, error}
 
   @doc """
   Turns a list of results into a result of list of values.
@@ -25,6 +26,37 @@ defmodule Xit.MiscUtil do
         with {:ok, value} <- result,
              {:ok, values} <- acc do
           {:ok, [value | values]}
+        else
+          error -> error
+        end
+      end
+    )
+  end
+
+  @doc """
+  Turns a list of simple results into a single simple result.
+  In case of an error, returns the first one encountered.
+
+  ## Examples
+
+      iex> Xit.MiscUtil.traverse_simple([])
+      :ok
+
+      iex> Xit.MiscUtil.traverse_simple([:ok, :ok, :ok])
+      :ok
+
+      iex> Xit.MiscUtil.traverse_simple([:ok, {:error, :reason1}, {:error, :reason2}])
+      {:error, :reason1}
+  """
+  @spec traverse_simple([simple_result(error)]) :: simple_result(error) when error: var
+  def traverse_simple(results) do
+    List.foldr(
+      results,
+      :ok,
+      fn result, acc ->
+        with :ok <- result,
+             :ok <- acc do
+          :ok
         else
           error -> error
         end
