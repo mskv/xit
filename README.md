@@ -80,7 +80,7 @@ Generated escript xit with MIX_ENV=dev
 
 ```
 ❯ ../xit checkout 6DE5486A5E266066C3EDED19DD0081BAD603FC61
-Checkout out 6DE5486A5E266066C3EDED19DD0081BAD603FC61
+Currently on 6DE5486A5E266066C3EDED19DD0081BAD603FC61
 ```
 
 - observe the contents of the working directory brought to the correct state
@@ -97,7 +97,7 @@ v1
 
 ```
 ❯ ../xit checkout 67E7B92EC23BA319EF07BB4F0399AA61B173FC3E
-Checkout out 67E7B92EC23BA319EF07BB4F0399AA61B173FC3E
+Currently on 67E7B92EC23BA319EF07BB4F0399AA61B173FC3E
 ```
 
 - observe the contents of the working directory brought to the correct state

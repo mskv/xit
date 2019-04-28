@@ -80,6 +80,6 @@ defmodule Xit.Cli do
   end
 
   defp checkout_copy(id) do
-    "Checkout out #{id}"
+    "Currently on #{id}"
   end
 end
