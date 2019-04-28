@@ -5,7 +5,7 @@ defmodule Xit.CommitCmd do
          {:ok, tree_sha} <- Xit.WriteTreeFromIndex.call(index),
          {:ok, head} <- Xit.Head.read(),
          parent_ids <- if(String.length(head) > 0, do: [head], else: []),
-         {:ok, commit_sha} <- Xit.Commit.new(tree_sha, parent_ids) |> Xit.Commit.persist(),
+         {:ok, commit_sha} <- Xit.Commit.new(tree_sha, parent_ids) |> Xit.ObjectRepo.write(),
          :ok <- Xit.Head.write(commit_sha) do
       :ok
     else

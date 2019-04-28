@@ -53,6 +53,12 @@ defmodule Xit.Cli do
           {:error, reason} -> IO.puts(error_copy(reason))
         end
 
+      ["checkout", id] ->
+        case Xit.CheckoutCmd.call(id) do
+          :ok -> IO.puts(checkout_copy(id))
+          {:error, reason} -> IO.puts(error_copy(reason))
+        end
+
       _ ->
         IO.puts(@not_recognized_copy)
     end
@@ -71,5 +77,9 @@ defmodule Xit.Cli do
     else
       Enum.join(log, "\n")
     end
+  end
+
+  defp checkout_copy(id) do
+    "Checkout out #{id}"
   end
 end

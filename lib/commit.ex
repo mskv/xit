@@ -24,9 +24,4 @@ defmodule Xit.Commit do
   def new(tree_id, parent_ids) do
     %__MODULE__{tree: tree_id, parents: parent_ids}
   end
-
-  @spec persist(__MODULE__.t()) :: {:ok, String.t()} | {:error, any}
-  def persist(commit) do
-    Xit.ObjectRepo.write(commit)
-  end
 end
