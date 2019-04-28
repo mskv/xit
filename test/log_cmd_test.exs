@@ -28,7 +28,7 @@ defmodule XitLogCmdTest do
     {:ok, first_child_commit_sha} = Xit.ObjectRepo.write(first_child_commit)
 
     second_child_commit = Xit.Commit.new("", [first_child_commit_sha])
-    {:ok, second_child_commit_sha} = Xit.ObjectRepo.write(second_child_commit)
+    {:ok, _second_child_commit_sha} = Xit.ObjectRepo.write(second_child_commit)
 
     :ok = Xit.Head.write(first_child_commit_sha)
 

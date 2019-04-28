@@ -114,4 +114,39 @@ defmodule Xit.PathUtil do
   defp split_path_nested_in?([x | xs], [y | ys]) do
     x === y and split_path_nested_in?(xs, ys)
   end
+
+  @doc """
+  Returns a list of normalized file paths descended from the given prefix.
+  Excludes paths prefixed with base dir.
+  """
+  @spec normalized_working_dir_paths(String.t(), String.t()) :: {:ok, [String.t()]} | {:error, any}
+  def normalized_working_dir_paths(cwd, prefix \\ ".") do
+    with {:ok, paths} <-
+           Xit.PathUtil.absolute_working_dir_paths(prefix)
+           |> Enum.map(&validate_normalize_path(&1, cwd))
+           |> Xit.MiscUtil.traverse() do
+      {:ok, Enum.reject(paths, &path_prefixed_with_base_dir?/1)}
+    else
+      error -> error
+    end
+  end
+
+  @doc """
+  Returns a list of absolute file paths descended from the given path.
+  If the given path points at a file, returns a one element list containing this path.
+  """
+  @spec absolute_working_dir_paths(String.t()) :: [String.t()]
+  def absolute_working_dir_paths(path) do
+    if File.exists?(path) && !File.dir?(path) do
+      [Path.expand(path)]
+    else
+      :filelib.fold_files(
+        String.to_charlist(path),
+        '.*',
+        true,
+        fn file, acc -> [to_string(file) | acc] end,
+        []
+      )
+    end
+  end
 end

@@ -45,4 +45,24 @@ defmodule Xit.MiscUtil do
   """
   @spec ok_or(boolean, reason) :: :ok | {:error, reason} when reason: var
   def ok_or(boolean, reason), do: if(boolean, do: :ok, else: {:error, reason})
+
+  @doc """
+  Maps over a collection concurrently.
+  """
+  @spec map_p([a], (a -> b)) :: [b] when a: var, b: var
+  def map_p(items, fun) do
+    # TODO: allow batching
+    items
+    |> Enum.map(fn item -> Task.async(fn -> fun.(item) end) end)
+    |> Enum.map(&Task.await/1)
+  end
+
+  @doc """
+  Maps over a collection concurrently using `map_p/2`,
+  and then gathers the results with `traverse/1`.
+  """
+  @spec map_traverse_p([a], (a -> result(b, error))) :: result([b], error) when a: var, b: var, error: var
+  def map_traverse_p(items, fun) do
+    items |> map_p(fun) |> traverse()
+  end
 end

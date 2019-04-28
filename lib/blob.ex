@@ -5,4 +5,8 @@ defmodule Xit.Blob do
   @type t :: %__MODULE__{
           content: String.t()
         }
+
+  def new(content) do
+    %__MODULE__{content: content}
+  end
 end

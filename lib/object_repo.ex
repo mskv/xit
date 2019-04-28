@@ -26,17 +26,11 @@ defmodule Xit.ObjectRepo do
 
   @spec write(object) :: {:ok, String.t()} | {:error, any}
   def write(object) do
-    serialized = :erlang.term_to_binary(object)
-    sha = :crypto.hash(:sha, serialized) |> Base.encode16()
-    file_path = object_file_path(sha)
+    {id, serialized} = serialize_and_get_id(object)
 
-    if File.exists?(file_path) do
-      {:ok, sha}
-    else
-      case File.write(file_path, serialized) do
-        :ok -> {:ok, sha}
-        error -> error
-      end
+    case maybe_write_file(id, serialized) do
+      :ok -> {:ok, id}
+      error -> error
     end
   end
 
@@ -48,28 +42,30 @@ defmodule Xit.ObjectRepo do
     end
   end
 
-  @spec write_blobs_by_paths([String.t()]) :: {:ok, [String.t()]} | {:error, any}
-  def write_blobs_by_paths(paths) do
-    # TODO: batch to keep memory usage in check
-    paths
-    |> Enum.map(fn path -> Task.async(fn -> write_blob_by_path(path) end) end)
-    |> Enum.map(&Task.await/1)
-    |> Xit.MiscUtil.traverse()
+  @spec serialize_and_get_id(object) :: {String.t(), String.t()}
+  def serialize_and_get_id(object) do
+    # Bad choice of serialization. It won't allow to stream id generation.
+    # A solution would be to separate blob content and header.
+    # Then we could update the hash with the header separately and the content
+    # could be streamed from the disk. Right now we have to load the whole thing
+    # into memory as the content is entwined with the header.
+    # By "header" I mean the metadata contained in the struct, for instance the
+    # very fact that an object is a %Xit.Blob{}. As described above, this bit
+    # could be separated from file content to allow streaming the content.
+    serialized = :erlang.term_to_binary(object)
+    id = :crypto.hash(:sha, serialized) |> Base.encode16()
+    {id, serialized}
   end
 
-  @spec write_blob_by_path(String.t()) :: {:ok, String.t()} | {:error, any}
-  def write_blob_by_path(path) do
-    with :ok <- ensure_file(path),
-         {:ok, content} <- File.read(path) do
-      write(%Xit.Blob{content: content})
+  @spec maybe_write_file(String.t(), String.t()) :: :ok | {:error, any}
+  def maybe_write_file(id, content) do
+    file_path = object_file_path(id)
+
+    if File.exists?(file_path) do
+      :ok
     else
-      error -> error
+      File.write(file_path, content)
     end
-  end
-
-  @spec ensure_file(String.t()) :: :ok | {:error, :not_file}
-  defp ensure_file(path) do
-    if File.exists?(path) && !File.dir?(path), do: :ok, else: {:error, :not_file}
   end
 
   @spec object_file_path(String.t()) :: String.t()

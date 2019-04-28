@@ -16,9 +16,9 @@ defmodule Xit.Index do
           entries: list(Entry.t())
         }
 
-  @spec new() :: t()
-  def new() do
-    %__MODULE__{entries: []}
+  @spec new([Entry.t()]) :: t()
+  def new(entries \\ []) do
+    %__MODULE__{entries: entries}
   end
 
   @spec read() :: {:ok, __MODULE__.t()} | {:error, any}
