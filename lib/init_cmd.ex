@@ -1,4 +1,8 @@
 defmodule Xit.InitCmd do
+  @doc """
+  Creates the `.xit` directory. Inside it there is a "HEAD" file, "index" file
+  and an empty "object" directory.
+  """
   @spec call() :: {:ok, :initialized} | {:ok, :reinitialized} | {:error, any}
   def call do
     ok_status = if db_base_dir_exists(), do: :reinitialized, else: :initialized

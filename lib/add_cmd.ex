@@ -1,4 +1,10 @@
 defmodule Xit.AddCmd do
+  @doc """
+  Looks at the working directory. Finds all the files prefixed with `path`.
+  It persists all the files found in the object repository.
+  Then it updates the staging area (index) to include only those files
+  in the `path` subtree.
+  """
   @spec call(String.t()) :: :ok | {:error, any}
   def call(path) do
     with {:ok, cwd} <- File.cwd(),
@@ -19,6 +25,7 @@ defmodule Xit.AddCmd do
     end
   end
 
+  # Persists the file found under `path` as an Xit.Blob.
   @spec write_blob(String.t()) :: {:ok, String.t()} | {:error, any}
   defp write_blob(path) do
     with {:ok, content} <- File.read(path) do

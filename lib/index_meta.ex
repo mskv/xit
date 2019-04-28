@@ -1,16 +1,22 @@
 defmodule Xit.IndexMeta do
-  # map of file paths to file ids
-  # example: %{"some/file" => "<sha>"}
+  @moduledoc """
+  `file_meta`
+  Map of file paths to file ids,
+  Example: %{"some/file" => "<sha>"}.
+
+  `dir_meta`
+  # Map of dir paths to sets containing the file and dir paths in given dirs.
+  # Example: %{"" => MapSet<["some"]>, "some" => MapSet<["some/file"]>}.
+  # Note that the content paths are not relative to the containing directory.
+  """
+
   @type file_meta :: %{required(String.t()) => String.t()}
-
-  # map of dir paths to sets containing the file and dir paths in given dirs
-  # example: %{"" => MapSet<["some"]>, "some" => MapSet<["some/file"]>}
-  # note that the content paths are not relative to the containing directory
   @type dir_meta :: %{required(String.t()) => MapSet.t(String.t())}
-
-  # index meta consists of both file and dir meta
   @type t :: {file_meta, dir_meta}
 
+  @doc """
+  Iterates over the index entries and builds up `file_meta` and `dir_meta`.
+  """
   @spec build(Xit.Index.t()) :: t
   def build(index) do
     Enum.reduce(
@@ -25,6 +31,10 @@ defmodule Xit.IndexMeta do
     )
   end
 
+  @doc """
+  Returns `{files_to_delete, dirs_to_delete, files_to_upsert}` that are
+  needed to attain `desired_index_meta` from `current_index_meta`.
+  """
   @spec compare_indices(Xit.IndexMeta.t(), Xit.IndexMeta.t()) ::
           {[String.t()], [String.t()], [String.t()]}
   def compare_indices(current_index_meta, desired_index_meta) do

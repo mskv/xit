@@ -1,4 +1,8 @@
 defmodule Xit.LogCmd do
+  @doc """
+  Reads the commit pointed at by HEAD. Then it walks the commit ancestry tree
+  up, noting all the commit IDs along the way.
+  """
   @spec call() :: {:ok, [String.t()]} | {:error, any}
   def call() do
     with {:ok, head} <- Xit.Head.read() do

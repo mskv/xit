@@ -68,6 +68,12 @@ defmodule Xit.Index do
     end
   end
 
+  @doc """
+  Inside an `index`, there may or may not be entires nested in `dir_path`.
+  If an entry is not prefixed by it, it stays untouched.
+  If an entry is prefiex by it, it gets deleted/updates/left alone depending
+  on whether it matches the contents of `desired_entries`.
+  """
   @spec update_deep(__MODULE__.t(), String.t(), [Entry.t()]) :: __MODULE__.t()
   def update_deep(index, dir_path, desired_entries) do
     do_update(index, desired_entries, fn entry ->

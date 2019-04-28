@@ -1,4 +1,12 @@
 defmodule Xit.CheckoutIndex do
+  @doc """
+  The goal is to make the contents of `index` the new working directory.
+  To achieve that, we first compute a new Xit.Index for the current
+  working directory. Then we compute Xit.IndexMeta for both the desired
+  index and the index we had just computed. Xit.IndexMeta is easy to compare,
+  and so with it we determine what files/dirs need deleting/adding to achieve
+  the goal.
+  """
   @spec call(Xit.Index.t()) :: :ok | {:error, any}
   def call(index) do
     with {:ok, cwd} <- File.cwd(),
@@ -23,6 +31,9 @@ defmodule Xit.CheckoutIndex do
     end
   end
 
+  # Builds an index for a list of file paths. To do that, it needs to read
+  # all the files and compute their SHAs. Unfortunately, with the way I had
+  # implemented my serialization, the files cannot be streamed.
   @spec build_index([String.t()]) :: {:ok, Xit.Index.t()} | {:error, any}
   defp build_index(file_paths) do
     with {:ok, ids} <- Xit.MiscUtil.map_traverse_p(file_paths, &get_file_blob_id/1) do
@@ -36,6 +47,7 @@ defmodule Xit.CheckoutIndex do
     end
   end
 
+  # Puts the file contents into an Xit.Blob and computes SHA for it.
   @spec get_file_blob_id(String.t()) :: {:ok, String.t()} | {:error, any}
   defp get_file_blob_id(file_path) do
     with {:ok, content} <- File.read(file_path) do
@@ -45,6 +57,7 @@ defmodule Xit.CheckoutIndex do
     end
   end
 
+  # Deletes files identified by give paths.
   @spec delete_files([String.t()]) :: :ok | {:error, any}
   defp delete_files(paths) do
     paths
@@ -52,6 +65,13 @@ defmodule Xit.CheckoutIndex do
     |> Xit.MiscUtil.traverse_simple()
   end
 
+  # Deletes dirs identified by given `paths`. It will fail if the dir is not
+  # empty, so you need to make sure all the files are gone already.
+  # It does not happen concurrently for the following reason... when calling
+  # this function I sometimes pass values like "test/something" and "test".
+  # To ensure that "test/something" gets deleted before "test", I first sort
+  # all the paths. Could probably be done smarter and concurrently with more
+  # work done on the paths before passing them here.
   @spec delete_dirs([String.t()]) :: :ok | {:error, any}
   defp delete_dirs(paths) do
     paths
@@ -62,6 +82,9 @@ defmodule Xit.CheckoutIndex do
     |> Xit.MiscUtil.traverse_simple()
   end
 
+  # Writes `paths` to the working directory. The contents of the files pointed
+  # to by the `paths` are determined thanks to the `file_meta`. Again, no
+  # file streaming due to how I implemented object serialization.
   @spec write_files([String.t()], Xit.IndexMeta.file_meta()) :: :ok | {:error, any}
   defp write_files(paths, file_meta) do
     paths
@@ -76,6 +99,7 @@ defmodule Xit.CheckoutIndex do
     |> Xit.MiscUtil.traverse_simple()
   end
 
+  # Writes a single blob identified by `blob_id` to the given `path`.
   @spec write_blob_to_path(String.t(), String.t()) :: :ok | {:error, any}
   defp write_blob_to_path(blob_id, path) do
     with {:ok, blob} <- Xit.ObjectRepo.read(blob_id) do

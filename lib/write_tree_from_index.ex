@@ -1,4 +1,9 @@
 defmodule Xit.WriteTreeFromIndex do
+  @doc """
+  The goal is to create a tree from the given `index`. We make use of
+  Xit.IndexMeta and recursively walk the directory tree, persisting all
+  the blobs we encounter and creating Xit.Tree for each directory we see.
+  """
   @spec call(Xit.Index.t()) :: {:ok, String.t()} | {:error, any}
   def call(index) do
     with :ok <- ensure_non_empty_index(index) do
@@ -23,10 +28,10 @@ defmodule Xit.WriteTreeFromIndex do
     file_shas = file_paths |> Enum.map(fn path -> Map.get(file_meta, path) end)
 
     persist_dirs =
-      dir_paths
-      |> Enum.map(fn path -> Task.async(fn -> write_path_from_index_meta(index_meta, path) end) end)
-      |> Enum.map(&Task.await/1)
-      |> Xit.MiscUtil.traverse()
+      Xit.MiscUtil.map_traverse_p(
+        dir_paths,
+        fn path -> write_path_from_index_meta(index_meta, path) end
+      )
 
     with {:ok, dir_shas} <- persist_dirs do
       tree_edges =
