@@ -8,6 +8,7 @@ defmodule Xit.IndexMeta do
   # Map of dir paths to sets containing the file and dir paths in given dirs.
   # Example: %{"" => MapSet<["some"]>, "some" => MapSet<["some/file"]>}.
   # Note that the content paths are not relative to the containing directory.
+  # They are relative to to root directory (identified as "").
   """
 
   @type file_meta :: %{required(String.t()) => String.t()}
