@@ -5,11 +5,7 @@ defmodule Xit.ObjectRepo do
   def read(object_id) do
     with file_path <- object_file_path(object_id),
          {:ok, serialized} <- File.read(file_path) do
-      try do
-        {:ok, :erlang.binary_to_term(serialized)}
-      rescue
-        ArgumentError -> {:error, :corrupted_object}
-      end
+      {:ok, Xit.Serializer.deserialize(serialized, {:error, :corrupted_object})}
     end
   end
 
@@ -25,7 +21,7 @@ defmodule Xit.ObjectRepo do
   def write(object) do
     {id, serialized} = serialize_and_get_id(object)
 
-    case maybe_write_file(id, serialized) do
+    case maybe_write_file({id, serialized}) do
       :ok -> {:ok, id}
       error -> error
     end
@@ -41,21 +37,13 @@ defmodule Xit.ObjectRepo do
 
   @spec serialize_and_get_id(object) :: {String.t(), String.t()}
   def serialize_and_get_id(object) do
-    # Bad choice of serialization. It won't allow to stream id generation.
-    # A solution would be to separate blob content and header.
-    # Then we could update the hash with the header separately and the content
-    # could be streamed from the disk. Right now we have to load the whole thing
-    # into memory as the content is entwined with the header.
-    # By "header" I mean the metadata contained in the struct, for instance the
-    # very fact that an object is a %Xit.Blob{}. As described above, this bit
-    # could be separated from file content to allow streaming the content.
-    serialized = :erlang.term_to_binary(object)
+    serialized = Xit.Serializer.serialize(object)
     id = :crypto.hash(:sha, serialized) |> Base.encode16()
     {id, serialized}
   end
 
-  @spec maybe_write_file(String.t(), String.t()) :: :ok | {:error, any}
-  def maybe_write_file(id, content) do
+  @spec maybe_write_file({String.t(), String.t()}) :: :ok | {:error, any}
+  defp maybe_write_file({id, content}) do
     file_path = object_file_path(id)
 
     if File.exists?(file_path) do

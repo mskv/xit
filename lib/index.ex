@@ -23,19 +23,12 @@ defmodule Xit.Index do
 
   @spec read() :: {:ok, __MODULE__.t()} | {:error, any}
   def read() do
-    with {:ok, serialized} <- File.read(Xit.Constants.index_path()) do
-      # :erlang.binary_to_term assumes correct input, otherwise throws
-      deserialized =
-        try do
-          case :erlang.binary_to_term(serialized) do
-            result = %Xit.Index{} -> result
-            _ -> new()
-          end
-        rescue
-          ArgumentError -> new()
-        end
-
-      {:ok, deserialized}
+    with {:ok, serialized} <- File.read(Xit.Constants.index_path()),
+         deserialized <- Xit.Serializer.deserialize(serialized, new()) do
+      case deserialized do
+        %Xit.Index{} -> {:ok, deserialized}
+        _ -> {:ok, new()}
+      end
     end
   end
 
@@ -49,7 +42,7 @@ defmodule Xit.Index do
 
   @spec write(__MODULE__.t()) :: :ok | {:error, any}
   def write(index) do
-    serialized = :erlang.term_to_binary(index)
+    serialized = Xit.Serializer.serialize(index)
     File.write(Xit.Constants.index_path(), serialized)
   end
 
