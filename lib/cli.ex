@@ -19,6 +19,10 @@ defmodule Xit.Cli do
     Staging area committed.
   """
 
+  @log_no_history_copy ~S"""
+    No history.
+  """
+
   @not_recognized_copy ~S"""
     Not recognized, try 'xit help' to see your options.
   """
@@ -71,15 +75,8 @@ defmodule Xit.Cli do
     """
   end
 
-  defp log_copy(log) do
-    if log === [] do
-      "No history"
-    else
-      Enum.join(log, "\n")
-    end
-  end
+  defp log_copy([]), do: @log_no_history_copy
+  defp log_copy(log), do: Enum.join(log, "\n")
 
-  defp checkout_copy(id) do
-    "Currently on #{id}"
-  end
+  defp checkout_copy(id), do: "Currently on #{id}"
 end

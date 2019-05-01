@@ -124,7 +124,7 @@ defmodule Xit.PathUtil do
     with {:ok, paths} <-
            Xit.PathUtil.absolute_working_dir_paths(prefix)
            |> Enum.map(&validate_normalize_path(&1, cwd))
-           |> Xit.MiscUtil.traverse() do
+           |> Xit.Helpers.traverse() do
       {:ok, Enum.reject(paths, &path_prefixed_with_base_dir?/1)}
     end
   end

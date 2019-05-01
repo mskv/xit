@@ -10,10 +10,9 @@ defmodule Xit.Commit do
   @doc """
   Commit without a parent is a root commit.
   """
-  @spec is_root?(__MODULE__.t()) :: boolean
-  def is_root?(commit) do
-    length(commit.parents) === 0
-  end
+  @spec root?(__MODULE__.t()) :: boolean
+  def root?(%__MODULE__{parents: []}), do: true
+  def root?(_), do: false
 
   @doc """
   The data model supports multiple commit parents. However, our implementation
@@ -23,10 +22,7 @@ defmodule Xit.Commit do
   """
   @spec primary_parent_id(__MODULE__.t()) :: String.t() | nil
   def primary_parent_id(commit) do
-    case commit.parents do
-      [] -> nil
-      [head | _] -> head
-    end
+    List.first(commit.parents)
   end
 
   @spec new(String.t(), [String.t()]) :: __MODULE__.t()

@@ -8,7 +8,7 @@ defmodule Xit.Cmd.Checkout do
   @spec call(String.t()) :: :ok | {:error, any}
   def call(id) do
     with {:ok, commit} <- Xit.ObjectRepo.read(id),
-         :ok <- Xit.MiscUtil.ok_or(is_commit(commit), :not_commit),
+         :ok <- Xit.Helpers.ok_or(is_commit(commit), :not_commit),
          {:ok, index} <- Xit.ReadTreeToIndex.call(Xit.Index.new(), commit.tree),
          :ok <- Xit.Index.write(index),
          :ok <- Xit.CheckoutIndex.call(index) do

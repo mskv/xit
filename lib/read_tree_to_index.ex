@@ -56,7 +56,7 @@ defmodule Xit.ReadTreeToIndex do
   @spec partition_tree_edges(Xit.Tree.t()) :: {:ok, {[Xit.Tree.Edge.t()], [Xit.Tree.Edge.t()]}} | {:error, any}
   defp partition_tree_edges(tree) do
     tree.edges
-    |> Xit.MiscUtil.map_p(fn edge -> Xit.ObjectRepo.read(edge.id) end)
+    |> Xit.Helpers.map_parallel(fn edge -> Xit.ObjectRepo.read(edge.id) end)
     |> Enum.zip(tree.edges)
     |> Enum.reduce(
       {:ok, {[], []}},

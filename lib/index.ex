@@ -82,9 +82,9 @@ defmodule Xit.Index do
   defp do_update(
          index,
          desired_new_entries,
-         entry_desirable
+         entry_desirable_fn
        ) do
-    desired_existant_entries = Enum.filter(index.entries, entry_desirable)
+    desired_existant_entries = Enum.filter(index.entries, entry_desirable_fn)
 
     new_entries = Enum.concat(desired_new_entries, desired_existant_entries)
     %Xit.Index{index | entries: new_entries}

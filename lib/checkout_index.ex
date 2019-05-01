@@ -32,7 +32,7 @@ defmodule Xit.CheckoutIndex do
   # implemented my serialization, the files cannot be streamed.
   @spec build_index([String.t()]) :: {:ok, Xit.Index.t()} | {:error, any}
   defp build_index(file_paths) do
-    with {:ok, ids} <- Xit.MiscUtil.map_traverse_p(file_paths, &get_file_blob_id/1) do
+    with {:ok, ids} <- Xit.Helpers.map_traverse_parallel(file_paths, &get_file_blob_id/1) do
       index_entries =
         Enum.zip(file_paths, ids)
         |> Enum.map(fn {path, id} -> %Xit.Index.Entry{path: path, id: id} end)
@@ -53,8 +53,8 @@ defmodule Xit.CheckoutIndex do
   @spec delete_files([String.t()]) :: :ok | {:error, any}
   defp delete_files(paths) do
     paths
-    |> Xit.MiscUtil.map_p(&File.rm/1)
-    |> Xit.MiscUtil.traverse_simple()
+    |> Xit.Helpers.map_parallel(&File.rm/1)
+    |> Xit.Helpers.traverse_simple()
   end
 
   # Deletes dirs identified by given `paths`. It will fail if the dir is not
@@ -71,7 +71,7 @@ defmodule Xit.CheckoutIndex do
       String.length(preceding) >= String.length(succeeding)
     end)
     |> Enum.map(fn path -> File.rmdir(path) end)
-    |> Xit.MiscUtil.traverse_simple()
+    |> Xit.Helpers.traverse_simple()
   end
 
   # Writes `paths` to the working directory. The contents of the files pointed
@@ -80,7 +80,7 @@ defmodule Xit.CheckoutIndex do
   @spec write_files([String.t()], Xit.IndexMeta.file_meta()) :: :ok | {:error, any}
   defp write_files(paths, file_meta) do
     paths
-    |> Xit.MiscUtil.map_p(fn path ->
+    |> Xit.Helpers.map_parallel(fn path ->
       if Map.has_key?(file_meta, path) do
         id = Map.get(file_meta, path)
         write_blob_to_path(id, path)
@@ -88,7 +88,7 @@ defmodule Xit.CheckoutIndex do
         {:error, :file_meta_corrupted}
       end
     end)
-    |> Xit.MiscUtil.traverse_simple()
+    |> Xit.Helpers.traverse_simple()
   end
 
   # Writes a single blob identified by `blob_id` to the given `path`.

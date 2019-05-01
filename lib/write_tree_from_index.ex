@@ -26,7 +26,7 @@ defmodule Xit.WriteTreeFromIndex do
     file_shas = file_paths |> Enum.map(fn path -> Map.get(file_meta, path) end)
 
     persist_dirs =
-      Xit.MiscUtil.map_traverse_p(
+      Xit.Helpers.map_traverse_parallel(
         dir_paths,
         fn path -> write_path_from_index_meta(index_meta, path) end
       )
