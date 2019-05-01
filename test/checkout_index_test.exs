@@ -12,7 +12,7 @@ defmodule XitCheckoutIndex do
   test """
     when the index is empty, clears the working directory
   """ do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
 
     # working directory
     File.write!("root_file", "test")
@@ -30,7 +30,7 @@ defmodule XitCheckoutIndex do
   test """
     when the index has some overlap, deletes the non-overlapping entries
   """ do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
 
     # working directory
     File.write!("root_file", "test")
@@ -58,7 +58,7 @@ defmodule XitCheckoutIndex do
   test """
     when the index contains new files, inserts them
   """ do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
 
     # working directory
     File.write!("root_file", "root_file")
@@ -107,7 +107,7 @@ defmodule XitCheckoutIndex do
   test """
     when the index contains files that are different, updates them
   """ do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
 
     # working directory
     File.write!("root_file", "root_file")

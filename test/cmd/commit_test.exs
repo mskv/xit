@@ -1,6 +1,6 @@
-defmodule XitCommitCmdTest do
+defmodule XitCmdCommitTest do
   use ExUnit.Case
-  doctest Xit.CommitCmd
+  doctest Xit.Cmd.Commit
 
   setup do
     Support.Fs.setup()
@@ -14,16 +14,16 @@ defmodule XitCommitCmdTest do
   end
 
   test "when index is empty, informs about it" do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
 
-    {:error, :empty_index} = Xit.CommitCmd.call()
+    {:error, :empty_index} = Xit.Cmd.Commit.call()
   end
 
   test "when head is empty, creates a root commit and points head at it" do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
     File.touch!("test")
-    :ok = Xit.AddCmd.call(".")
-    :ok = Xit.CommitCmd.call()
+    :ok = Xit.Cmd.Add.call(".")
+    :ok = Xit.Cmd.Commit.call()
 
     head = File.read!(".xit/HEAD")
     commit = :erlang.binary_to_term(File.read!(".xit/objects/#{head}"))
@@ -34,11 +34,11 @@ defmodule XitCommitCmdTest do
   end
 
   test "when head is non-empty, creates a child commit referencing the parent and points head at it" do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
     File.touch!("test")
-    :ok = Xit.AddCmd.call(".")
+    :ok = Xit.Cmd.Add.call(".")
     File.write!(".xit/HEAD", "parent_sha")
-    :ok = Xit.CommitCmd.call()
+    :ok = Xit.Cmd.Commit.call()
 
     head = File.read!(".xit/HEAD")
     commit = :erlang.binary_to_term(File.read!(".xit/objects/#{head}"))

@@ -1,6 +1,6 @@
-defmodule XitAddCmdTest do
+defmodule XitCmdAddTest do
   use ExUnit.Case
-  doctest Xit.AddCmd
+  doctest Xit.Cmd.Add
 
   setup do
     Support.Fs.setup()
@@ -14,14 +14,14 @@ defmodule XitAddCmdTest do
   end
 
   test "when given path outside the current working directory, informs about it" do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
 
-    {:error, :path_outside_cwd} = Xit.AddCmd.call("..")
+    {:error, :path_outside_cwd} = Xit.Cmd.Add.call("..")
   end
 
   test "when given non existant path, informs about it" do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
 
-    {:error, :no_match} = Xit.AddCmd.call("test")
+    {:error, :no_match} = Xit.Cmd.Add.call("test")
   end
 end

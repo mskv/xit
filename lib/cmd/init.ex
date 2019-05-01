@@ -1,4 +1,4 @@
-defmodule Xit.InitCmd do
+defmodule Xit.Cmd.Init do
   @doc """
   Creates the `.xit` directory. Inside it there is a "HEAD" file, "index" file
   and an empty "object" directory.

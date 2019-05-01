@@ -1,4 +1,4 @@
-defmodule Xit.AddCmd do
+defmodule Xit.Cmd.Add do
   @doc """
   Looks at the working directory. Finds all the files prefixed with `path`.
   It persists all the files found in the object repository.

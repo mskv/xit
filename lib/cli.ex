@@ -29,32 +29,32 @@ defmodule Xit.Cli do
         IO.puts(@help_copy)
 
       ["init"] ->
-        case Xit.InitCmd.call() do
+        case Xit.Cmd.Init.call() do
           {:ok, :initialized} -> IO.puts(@initialized_copy)
           {:ok, :reinitialized} -> IO.puts(@reinitialized_copy)
           {:error, reason} -> IO.puts(error_copy(reason))
         end
 
       ["add", path] ->
-        case Xit.AddCmd.call(path) do
+        case Xit.Cmd.Add.call(path) do
           :ok -> IO.puts(@added_copy)
           {:error, reason} -> IO.puts(error_copy(reason))
         end
 
       ["commit"] ->
-        case Xit.CommitCmd.call() do
+        case Xit.Cmd.Commit.call() do
           :ok -> IO.puts(@committed_copy)
           {:error, reason} -> IO.puts(error_copy(reason))
         end
 
       ["log"] ->
-        case Xit.LogCmd.call() do
+        case Xit.Cmd.Log.call() do
           {:ok, log} -> IO.puts(log_copy(log))
           {:error, reason} -> IO.puts(error_copy(reason))
         end
 
       ["checkout", id] ->
-        case Xit.CheckoutCmd.call(id) do
+        case Xit.Cmd.Checkout.call(id) do
           :ok -> IO.puts(checkout_copy(id))
           {:error, reason} -> IO.puts(error_copy(reason))
         end

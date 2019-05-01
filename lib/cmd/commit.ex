@@ -1,4 +1,4 @@
-defmodule Xit.CommitCmd do
+defmodule Xit.Cmd.Commit do
   @doc """
   Committing consists of the following... we first build a tree from the
   current staging area (index). Then we find out what the current HEAD is

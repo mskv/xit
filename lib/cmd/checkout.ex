@@ -1,4 +1,4 @@
-defmodule Xit.CheckoutCmd do
+defmodule Xit.Cmd.Checkout do
   @doc """
   The goal is to set the contents of the working directory to the contents
   of the tree pointed to by the commit identified by `id`. To do that, we

@@ -12,7 +12,7 @@ defmodule XitReadTreeToIndexTest do
   test ~S"""
     reading into an empty index populates it
   """ do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
     mock_index = populate_mock_index()
     {:ok, root_tree_sha} = Xit.WriteTreeFromIndex.call(mock_index)
 
@@ -27,7 +27,7 @@ defmodule XitReadTreeToIndexTest do
     reading into an index that already has some entries under read paths
     overwrites those entries and appends the rest
   """ do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
     mock_index = populate_mock_index()
     {:ok, root_tree_sha} = Xit.WriteTreeFromIndex.call(mock_index)
 
@@ -48,7 +48,7 @@ defmodule XitReadTreeToIndexTest do
     reading into an index that has some entries under different paths
     deletes all entries that are not among the read ones
   """ do
-    {:ok, :initialized} = Xit.InitCmd.call()
+    {:ok, :initialized} = Xit.Cmd.Init.call()
     mock_index = populate_mock_index()
     {:ok, root_tree_sha} = Xit.WriteTreeFromIndex.call(mock_index)
 
