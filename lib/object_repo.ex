@@ -13,7 +13,7 @@ defmodule Xit.ObjectRepo do
   def read!(object_id) do
     case read(object_id) do
       {:ok, object} -> object
-      _ -> raise "object reading failed"
+      _ -> raise Xit.RuntimeError, "object reading failed"
     end
   end
 
@@ -31,7 +31,7 @@ defmodule Xit.ObjectRepo do
   def write!(object) do
     case write(object) do
       {:ok, id} -> id
-      _ -> raise "object writing failed"
+      _ -> raise Xit.RuntimeError, "object writing failed"
     end
   end
 

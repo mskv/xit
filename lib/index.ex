@@ -36,7 +36,7 @@ defmodule Xit.Index do
   def read!() do
     case read() do
       {:ok, index} -> index
-      _ -> raise "index reading failed"
+      _ -> raise Xit.RuntimeError, "index reading failed"
     end
   end
 
@@ -50,7 +50,7 @@ defmodule Xit.Index do
   def write!(index) do
     case write(index) do
       :ok -> :ok
-      _ -> raise "index writing failed"
+      _ -> raise Xit.RuntimeError, "index writing failed"
     end
   end
 
