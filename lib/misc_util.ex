@@ -26,8 +26,6 @@ defmodule Xit.MiscUtil do
         with {:ok, value} <- result,
              {:ok, values} <- acc do
           {:ok, [value | values]}
-        else
-          error -> error
         end
       end
     )
@@ -57,8 +55,6 @@ defmodule Xit.MiscUtil do
         with :ok <- result,
              :ok <- acc do
           :ok
-        else
-          error -> error
         end
       end
     )

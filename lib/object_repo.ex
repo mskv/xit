@@ -3,16 +3,13 @@ defmodule Xit.ObjectRepo do
 
   @spec read(String.t()) :: {:ok, object} | {:error, any}
   def read(object_id) do
-    file_path = object_file_path(object_id)
-
-    with {:ok, serialized} <- File.read(file_path) do
+    with file_path <- object_file_path(object_id),
+         {:ok, serialized} <- File.read(file_path) do
       try do
         {:ok, :erlang.binary_to_term(serialized)}
       rescue
         ArgumentError -> {:error, :corrupted_object}
       end
-    else
-      error -> error
     end
   end
 

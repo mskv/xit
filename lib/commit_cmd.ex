@@ -15,8 +15,6 @@ defmodule Xit.CommitCmd do
          {:ok, commit_sha} <- Xit.Commit.new(tree_sha, parent_ids) |> Xit.ObjectRepo.write(),
          :ok <- Xit.Head.write(commit_sha) do
       :ok
-    else
-      error -> error
     end
   end
 end

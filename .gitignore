@@ -25,3 +25,6 @@ xit-*.tar
 # Generated .xit dir and xit binary
 .xit
 xit
+
+# Elixir language server
+.elixir_ls

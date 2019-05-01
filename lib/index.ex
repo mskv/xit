@@ -36,8 +36,6 @@ defmodule Xit.Index do
         end
 
       {:ok, deserialized}
-    else
-      error -> error
     end
   end
 
@@ -52,12 +50,7 @@ defmodule Xit.Index do
   @spec write(__MODULE__.t()) :: :ok | {:error, any}
   def write(index) do
     serialized = :erlang.term_to_binary(index)
-
-    with :ok <- File.write(Xit.Constants.index_path(), serialized) do
-      :ok
-    else
-      error -> error
-    end
+    File.write(Xit.Constants.index_path(), serialized)
   end
 
   @spec write!(__MODULE__.t()) :: :ok

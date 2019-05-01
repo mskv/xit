@@ -26,13 +26,9 @@ defmodule Xit.ReadTreeToIndex do
         fn edge, acc ->
           with {:ok, index} <- acc do
             call(index, edge.id, Path.join(prefix, edge.path))
-          else
-            error -> error
           end
         end
       )
-    else
-      error -> error
     end
   end
 
@@ -45,8 +41,6 @@ defmodule Xit.ReadTreeToIndex do
         %Xit.Tree{} -> {:ok, object}
         _ -> {:error, :invalid_object}
       end
-    else
-      error -> error
     end
   end
 
@@ -74,8 +68,6 @@ defmodule Xit.ReadTreeToIndex do
             %Xit.Blob{} -> {:ok, {tree_edges, [edge | blob_edges]}}
             _ -> {:error, :invalid_object}
           end
-        else
-          error -> error
         end
       end
     )

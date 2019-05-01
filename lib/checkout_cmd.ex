@@ -13,8 +13,6 @@ defmodule Xit.CheckoutCmd do
          :ok <- Xit.Index.write(index),
          :ok <- Xit.CheckoutIndex.call(index) do
       :ok
-    else
-      error -> error
     end
   end
 

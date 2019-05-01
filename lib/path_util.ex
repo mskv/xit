@@ -126,8 +126,6 @@ defmodule Xit.PathUtil do
            |> Enum.map(&validate_normalize_path(&1, cwd))
            |> Xit.MiscUtil.traverse() do
       {:ok, Enum.reject(paths, &path_prefixed_with_base_dir?/1)}
-    else
-      error -> error
     end
   end
 

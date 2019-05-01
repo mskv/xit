@@ -20,8 +20,6 @@ defmodule Xit.AddCmd do
       updated_index = Xit.Index.update_deep(index, valid_path, desired_index_entries)
 
       Xit.Index.write(updated_index)
-    else
-      error -> error
     end
   end
 
@@ -30,8 +28,6 @@ defmodule Xit.AddCmd do
   defp write_blob(path) do
     with {:ok, content} <- File.read(path) do
       Xit.Blob.new(content) |> Xit.ObjectRepo.write()
-    else
-      error -> error
     end
   end
 end

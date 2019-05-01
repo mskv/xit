@@ -9,8 +9,6 @@ defmodule Xit.WriteTreeFromIndex do
     with :ok <- ensure_non_empty_index(index) do
       index_meta = Xit.IndexMeta.build(index)
       write_path_from_index_meta(index_meta, "")
-    else
-      error -> error
     end
   end
 
@@ -45,8 +43,6 @@ defmodule Xit.WriteTreeFromIndex do
 
       tree = %Xit.Tree{edges: tree_edges}
       Xit.ObjectRepo.write(tree)
-    else
-      error -> error
     end
   end
 

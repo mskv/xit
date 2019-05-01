@@ -11,8 +11,6 @@ defmodule Xit.LogCmd do
       else
         walk_commit_tree(head)
       end
-    else
-      error -> error
     end
   end
 
@@ -24,14 +22,10 @@ defmodule Xit.LogCmd do
       if parent_id do
         with {:ok, ancestry} <- walk_commit_tree(parent_id) do
           {:ok, [commit_id | ancestry]}
-        else
-          error -> error
         end
       else
         {:ok, [commit_id]}
       end
-    else
-      error -> error
     end
   end
 

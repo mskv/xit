@@ -23,11 +23,7 @@ defmodule Xit.CheckoutIndex do
            :ok <- delete_dirs(dirs_to_delete),
            :ok <- write_files(files_to_upsert, file_meta) do
         :ok
-      else
-        error -> error
       end
-    else
-      error -> error
     end
   end
 
@@ -42,8 +38,6 @@ defmodule Xit.CheckoutIndex do
         |> Enum.map(fn {path, id} -> %Xit.Index.Entry{path: path, id: id} end)
 
       {:ok, %Xit.Index{entries: index_entries}}
-    else
-      error -> error
     end
   end
 
@@ -52,8 +46,6 @@ defmodule Xit.CheckoutIndex do
   defp get_file_blob_id(file_path) do
     with {:ok, content} <- File.read(file_path) do
       {:ok, Xit.Blob.new(content) |> Xit.ObjectRepo.serialize_and_get_id() |> elem(0)}
-    else
-      error -> error
     end
   end
 
@@ -108,8 +100,6 @@ defmodule Xit.CheckoutIndex do
           with :ok <- File.mkdir_p(Path.dirname(path)),
                :ok <- File.write(path, blob.content) do
             :ok
-          else
-            error -> error
           end
 
         _ ->
